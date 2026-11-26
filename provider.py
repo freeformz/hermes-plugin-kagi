@@ -10,8 +10,8 @@ Endpoints used:
     POST /search   {"query", "limit"}         -> data.search[]
     POST /extract  {"pages": [{"url"}], ...}  -> data[] (markdown | error)
 
-Env vars (read with ``get_provider_env``, so a multiplexed gateway uses the
-served profile's values, not the launch profile's environment):
+Env vars (read with ``agent.secret_scope.get_secret``, so a multiplexed gateway
+uses the served profile's values, never another profile's):
 
     KAGI_API_KEY      Bearer token for the Kagi v1 API (required).
                       Create one at https://kagi.com/api/keys.
@@ -25,11 +25,11 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Tuple
 
-from agent.web_search_provider import WebSearchProvider, get_provider_env
+from agent.web_search_provider import WebSearchProvider
 
 logger = logging.getLogger(__name__)
 
-PLUGIN_VERSION = "0.2.0"
+PLUGIN_VERSION = "0.2.1"
 _DEFAULT_HOST = "https://kagi.com/api/v1"
 _EXTRACT_BATCH = 10           # /extract accepts 1-10 pages per call
 _SEARCH_LIMIT_MAX = 1024      # /search "limit" range is 1-1024
@@ -40,6 +40,13 @@ _MISSING_KEY = f"KAGI_API_KEY environment variable not set. Create a key at {_KE
 _PAGE_LOCATION = re.compile(r"^pages\[(\d+)\]")
 _TAG = re.compile(r"<[^>]+>")
 _SPACE = re.compile(r"\s+")
+
+
+def _env(name: str) -> str:
+    """A credential or setting through Hermes' profile-scoped secret route (catalog rule 11)."""
+    from agent.secret_scope import get_secret_str
+
+    return (get_secret_str(name) or "").strip()
 
 
 class KagiError(Exception):
@@ -93,10 +100,10 @@ def _post(path: str, payload: Dict[str, Any], timeout: float) -> Dict[str, Any]:
     """POST to the Kagi API and return the decoded JSON body, or raise :class:`KagiError`."""
     import httpx
 
-    api_key = get_provider_env("KAGI_API_KEY")
+    api_key = _env("KAGI_API_KEY")
     if not api_key:
         raise KagiError(_MISSING_KEY)
-    host = (get_provider_env("KAGI_API_BASE_URL") or _DEFAULT_HOST).rstrip("/")
+    host = (_env("KAGI_API_BASE_URL") or _DEFAULT_HOST).rstrip("/")
     try:
         # follow_redirects=False (httpx's default): the bearer token never goes to another host.
         resp = httpx.post(f"{host}{path}", json=payload, headers=_headers(api_key),
@@ -207,7 +214,7 @@ class KagiWebSearchProvider(WebSearchProvider):
     def is_available(self) -> bool:
         # Cheap, no network: Hermes calls this on every `hermes tools` paint.
         try:
-            return bool(get_provider_env("KAGI_API_KEY"))
+            return bool(_env("KAGI_API_KEY"))
         except Exception:  # noqa: BLE001 - e.g. no profile scope bound yet
             return False
 
@@ -239,7 +246,11 @@ class KagiWebSearchProvider(WebSearchProvider):
         """
         if not urls:
             return []
-        if not get_provider_env("KAGI_API_KEY"):
+        try:
+            has_key = bool(_env("KAGI_API_KEY"))
+        except Exception as exc:  # noqa: BLE001 - e.g. no profile scope bound
+            return [_page_error(u, f"Kagi extract failed: {exc}") for u in urls]
+        if not has_key:
             return [_page_error(u, _MISSING_KEY) for u in urls]
         documents: List[Dict[str, Any]] = []
         for start in range(0, len(urls), _EXTRACT_BATCH):

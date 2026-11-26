@@ -11,6 +11,10 @@ Pure Python, no dependencies of its own: it calls the [Kagi v1 API](https://kagi
 | `web_search` | `POST https://kagi.com/api/v1/search` |
 | `web_extract` | `POST https://kagi.com/api/v1/extract` (10 URLs per call) |
 
+## Requirements
+
+Hermes Agent 0.23.4 or newer (the version it's tested on; declared as `requires_hermes` in `plugin.yaml`).
+
 ## Install
 
 ```sh
@@ -51,7 +55,7 @@ hermes tools
 
 ## Profiles
 
-Credentials are read with Hermes' `get_provider_env`, so in a multiplexed gateway each profile uses the `KAGI_API_KEY` from its own `.env`. A profile without a key gets an error instead of silently using another profile's key. Each profile also needs the plugin enabled in its own `plugins.enabled` and its own `web.*_backend` settings.
+Credentials are read with Hermes' profile-scoped `agent.secret_scope.get_secret`, so in a multiplexed gateway each profile uses the `KAGI_API_KEY` from its own `.env`. A profile without a key gets an error instead of silently using another profile's key. Each profile also needs the plugin enabled in its own `plugins.enabled` and its own `web.*_backend` settings.
 
 ## Environment Variables
 
@@ -87,6 +91,11 @@ URL lists longer than 10 are split across calls. Kagi rejects a whole call (HTTP
 ### Errors
 
 API failures (bad key, IP not allowed, rate limit or usage exhausted) come back as `{"success": False, "error": ...}` with Kagi's own message, the HTTP status and Kagi's trace ID, which Kagi support asks for.
+
+## What it does on your machine
+
+- Sends your search queries and the URLs you ask it to extract to `kagi.com` (or `KAGI_API_BASE_URL`), with your `KAGI_API_KEY`. Kagi bills each call to your account.
+- Nothing else: no other network hosts, no shell commands, no files written, no background processes, no telemetry, no self-updater. It registers one web provider and no tools or hooks.
 
 ## Why is it Kagi-specific?
 

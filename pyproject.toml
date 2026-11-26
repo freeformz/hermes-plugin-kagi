@@ -3,7 +3,7 @@
 # An empty list counts as "no declaration", so PM leaves the shared environment alone.
 [project]
 name = "hermes-plugin-web-kagi"
-version = "0.2.0"
+version = "0.2.1"
 description = "Kagi web search + content extraction for hermes-agent"
 requires-python = ">=3.11"
 dependencies = []
