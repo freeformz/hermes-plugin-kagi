@@ -29,7 +29,7 @@ from agent.web_search_provider import WebSearchProvider
 
 logger = logging.getLogger(__name__)
 
-PLUGIN_VERSION = "0.2.1"
+PLUGIN_VERSION = "0.2.2"
 _DEFAULT_HOST = "https://kagi.com/api/v1"
 _EXTRACT_BATCH = 10           # /extract accepts 1-10 pages per call
 _SEARCH_LIMIT_MAX = 1024      # /search "limit" range is 1-1024

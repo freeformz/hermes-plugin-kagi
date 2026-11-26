@@ -13,7 +13,7 @@ Pure Python, no dependencies of its own: it calls the [Kagi v1 API](https://kagi
 
 ## Requirements
 
-Hermes Agent 0.23.4 or newer (the version it's tested on; declared as `requires_hermes` in `plugin.yaml`).
+Hermes Agent 0.22.6 or newer (declared as `requires_hermes` in `plugin.yaml`). Tested on 0.23.4.
 
 ## Install
 
