@@ -1,10 +1,10 @@
-# Hermes plugin manifest for Python dependencies. Hermes' package manager reads
-# [project].dependencies from this file and installs them into its venv. It ignores
-# requirements.txt and rejects direct git/URL requirements, so this uses the PyPI build of
-# kagisearch/kagi-openapi-python, which provides the same `openapi_client` package.
+# Python dependencies for Hermes' package manager (PM), which reads [project].dependencies
+# and resolves them into Hermes' shared environment. PM rejects direct git/URL requirements,
+# so this uses the PyPI build of kagisearch/kagi-openapi-python (it provides the
+# `openapi_client` package). Exact pin: the client is a pre-release, so review each bump.
 [project]
 name = "hermes-plugin-web-kagi"
-version = "0.0.1"
+version = "0.1.0"
 description = "Kagi web search + content extraction for hermes-agent"
 requires-python = ">=3.11"
 dependencies = [

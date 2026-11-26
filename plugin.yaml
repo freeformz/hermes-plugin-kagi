@@ -1,7 +1,16 @@
 name: web-kagi
-version: 0.0.1
-description: "Kagi web search + content extraction for hermes-agent. Premium per-call API — requires KAGI_API_KEY (create at https://kagi.com/settings/api_keys). Also requires the Kagi Python client: pip install git+https://github.com/kagisearch/kagi-openapi-python.git"
+version: 0.1.0
+manifest_version: 2
+description: "Kagi web search + content extraction for hermes-agent. Premium per-call API — requires KAGI_API_KEY (create at https://kagi.com/settings/api_keys)."
 author: freeformz
+license: MIT
+homepage: https://github.com/freeformz/hermes-plugin-kagi
+tags: [web, search]
 kind: backend
 provides_web_providers:
   - kagi
+requires_env:
+  - name: KAGI_API_KEY
+    description: "Kagi API key (paid, per-call billing)"
+    url: "https://kagi.com/settings/api_keys"
+    secret: true

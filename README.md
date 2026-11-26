@@ -15,10 +15,13 @@ Pure Python — uses the official [`kagi-openapi-python`](https://github.com/kag
 
 ```sh
 hermes plugins install https://github.com/freeformz/hermes-plugin-kagi
-pip install git+https://github.com/kagisearch/kagi-openapi-python.git
 ```
 
-The first command clones this repo into `~/.hermes/plugins/web-kagi/`. The second installs the Kagi Python client (it's not on PyPI yet, so it can't ship as a normal pip dep).
+This clones the repo into `~/.hermes/plugins/web-kagi/`. Hermes' package manager installs the Kagi
+Python client from `pyproject.toml` (`kagi-client`, the PyPI build of
+[kagi-openapi-python](https://github.com/kagisearch/kagi-openapi-python)) when you consent to the
+plugin's dependencies, and prompts for `KAGI_API_KEY` if it isn't set. Don't `pip install` the
+client by hand: PM rebuilds its environment on updates and would drop it.
 
 ## Configure
 
@@ -28,7 +31,7 @@ Set your API key (create one at https://kagi.com/settings/api_keys):
 echo 'KAGI_API_KEY=your-kagi-api-key' >> ~/.hermes/.env
 ```
 
-Then in `~/.hermes/config.yaml`, enable the plugin and route web traffic through it:
+Then in `~/.hermes/config.yaml` (or a profile's `config.yaml`), enable the plugin and route web traffic through it:
 
 ```yaml
 plugins:
@@ -49,6 +52,10 @@ hermes tools
 ```
 
 `Kagi` should appear in the Web Search / Web Extract picker, badged `paid`.
+
+## Profiles
+
+Credentials are read with Hermes' `get_provider_env`, so in a multiplexed gateway each profile uses the `KAGI_API_KEY` from its own `.env`. A profile without a key gets an error instead of silently using another profile's key. Each profile also needs the plugin enabled in its own `plugins.enabled` and its own `web.*_backend` settings.
 
 ## Environment Variables
 
@@ -77,7 +84,7 @@ Kagi's `data.search[]` array (the primary web results — `infobox`, `adjacent_q
 
 ### `extract`
 
-Kagi returns markdown for each page in `data[].markdown`; the plugin emits per-URL documents using that as both `content` and `raw_content`. Kagi's `errors[]` entries become documents with an `error` field. URL lists longer than 10 are chunked across multiple API calls (Kagi caps per-call at 10).
+Kagi returns markdown for each page in `data[].markdown`; the plugin emits per-URL documents using that as both `content` and `raw_content`. Kagi's `errors[]` entries become documents with an `error` field. URL lists longer than 10 are chunked across multiple API calls (Kagi caps per-call at 10); a failed batch reports its own URLs as errors without dropping the others.
 
 ## Why is it Kagi-specific?
 
