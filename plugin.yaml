@@ -1,7 +1,7 @@
 name: web-kagi
-version: 0.1.0
+version: 0.2.0
 manifest_version: 2
-description: "Kagi web search + content extraction for hermes-agent. Premium per-call API — requires KAGI_API_KEY (create at https://kagi.com/settings/api_keys)."
+description: "Kagi web search + content extraction for hermes-agent. Premium per-call API — requires KAGI_API_KEY (create at https://kagi.com/api/keys)."
 author: freeformz
 license: MIT
 homepage: https://github.com/freeformz/hermes-plugin-kagi
@@ -12,5 +12,5 @@ provides_web_providers:
 requires_env:
   - name: KAGI_API_KEY
     description: "Kagi API key (paid, per-call billing)"
-    url: "https://kagi.com/settings/api_keys"
+    url: "https://kagi.com/api/keys"
     secret: true
